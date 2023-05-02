@@ -130,6 +130,12 @@ npx supabase login
 
 ```bash
 npx supabase gen types typescript --project-id [YOUR-PROJECT-REF] --schema public > types_db.ts
+
+wxkxjqxtlxxloidgfxal
+```
+```
+npx supabase gen types typescript --project-id wxkxjqxtlxxloidgfxal --schema public > types_db.ts
+
 ```
 
 ### That's it

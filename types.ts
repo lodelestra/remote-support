@@ -48,7 +48,7 @@ export interface Price {
   products?: Product;
 }
 
-export interface PriceWithProduct extends Price {}
+export interface PriceWithProduct extends Price { }
 
 export interface Subscription {
   id: string /* primary key */;
@@ -67,4 +67,11 @@ export interface Subscription {
   trial_start?: string;
   trial_end?: string;
   prices?: Price;
+}
+
+export interface Website {
+  id: string /* primary key */;
+  url: string;
+  public_key: string;
+  user_id: string /* foreign key */;
 }

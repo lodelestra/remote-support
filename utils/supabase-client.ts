@@ -3,7 +3,7 @@ import {
   User
 } from '@supabase/auth-helpers-nextjs';
 
-import { ProductWithPrice } from 'types';
+import { ProductWithPrice, Website } from 'types';
 import type { Database } from 'types_db';
 
 export const supabase = createBrowserSupabaseClient<Database>();
@@ -34,3 +34,14 @@ export const updateUserName = async (user: User, name: string) => {
     })
     .eq('id', user.id);
 };
+
+export const getUserWebsites = async (): Promise<Website[]> => {
+  const { data, error } = await supabase
+    .from('websites')
+    .select('*')
+  if (error) {
+    console.log(error.message)
+  }
+  // TODO typing issue
+  return (data as any) || [];
+}
