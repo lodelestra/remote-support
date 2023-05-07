@@ -64,11 +64,11 @@ const createOrRetrieveCustomer = async ({
   if (error || !data?.stripe_customer_id) {
     // No customer record found, let's create one.
     const customerData: { metadata: { supabaseUUID: string }; email?: string } =
-      {
-        metadata: {
-          supabaseUUID: uuid
-        }
-      };
+    {
+      metadata: {
+        supabaseUUID: uuid
+      }
+    };
     if (email) customerData.email = email;
     const customer = await stripe.customers.create(customerData);
     // Now insert the customer ID into our Supabase mapping table.
@@ -81,6 +81,7 @@ const createOrRetrieveCustomer = async ({
   }
   return data.stripe_customer_id;
 };
+
 
 /**
  * Copies the billing details from the payment method to the customer object.
@@ -125,39 +126,39 @@ const manageSubscriptionStatusChange = async (
   });
   // Upsert the latest status of the subscription object.
   const subscriptionData: Database['public']['Tables']['subscriptions']['Insert'] =
-    {
-      id: subscription.id,
-      user_id: uuid,
-      metadata: subscription.metadata,
-      status: subscription.status,
-      price_id: subscription.items.data[0].price.id,
-      //TODO check quantity on subscription
-      // @ts-ignore
-      quantity: subscription.quantity,
-      cancel_at_period_end: subscription.cancel_at_period_end,
-      cancel_at: subscription.cancel_at
-        ? toDateTime(subscription.cancel_at).toISOString()
-        : null,
-      canceled_at: subscription.canceled_at
-        ? toDateTime(subscription.canceled_at).toISOString()
-        : null,
-      current_period_start: toDateTime(
-        subscription.current_period_start
-      ).toISOString(),
-      current_period_end: toDateTime(
-        subscription.current_period_end
-      ).toISOString(),
-      created: toDateTime(subscription.created).toISOString(),
-      ended_at: subscription.ended_at
-        ? toDateTime(subscription.ended_at).toISOString()
-        : null,
-      trial_start: subscription.trial_start
-        ? toDateTime(subscription.trial_start).toISOString()
-        : null,
-      trial_end: subscription.trial_end
-        ? toDateTime(subscription.trial_end).toISOString()
-        : null
-    };
+  {
+    id: subscription.id,
+    user_id: uuid,
+    metadata: subscription.metadata,
+    status: subscription.status,
+    price_id: subscription.items.data[0].price.id,
+    //TODO check quantity on subscription
+    // @ts-ignore
+    quantity: subscription.quantity,
+    cancel_at_period_end: subscription.cancel_at_period_end,
+    cancel_at: subscription.cancel_at
+      ? toDateTime(subscription.cancel_at).toISOString()
+      : null,
+    canceled_at: subscription.canceled_at
+      ? toDateTime(subscription.canceled_at).toISOString()
+      : null,
+    current_period_start: toDateTime(
+      subscription.current_period_start
+    ).toISOString(),
+    current_period_end: toDateTime(
+      subscription.current_period_end
+    ).toISOString(),
+    created: toDateTime(subscription.created).toISOString(),
+    ended_at: subscription.ended_at
+      ? toDateTime(subscription.ended_at).toISOString()
+      : null,
+    trial_start: subscription.trial_start
+      ? toDateTime(subscription.trial_start).toISOString()
+      : null,
+    trial_end: subscription.trial_end
+      ? toDateTime(subscription.trial_end).toISOString()
+      : null
+  };
 
   const { error } = await supabaseAdmin
     .from('subscriptions')
@@ -177,9 +178,27 @@ const manageSubscriptionStatusChange = async (
     );
 };
 
+const createUserWebsite = async ({
+  uuid,
+  url,
+}: { uuid: string; url: string }) => {
+  // TODO replace with a proper hash from url
+  const hash = Math.random().toString(36).slice(2);
+  const public_key=`pk_${hash}`;
+  const { data, error } = await supabaseAdmin
+  .from('websites')
+  .insert({ user_id: uuid, url: url, public_key: public_key });
+
+  if (error) {
+    throw error;
+  }
+  return data
+}
+
 export {
   upsertProductRecord,
   upsertPriceRecord,
   createOrRetrieveCustomer,
-  manageSubscriptionStatusChange
+  manageSubscriptionStatusChange,
+  createUserWebsite
 };
