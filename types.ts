@@ -74,4 +74,12 @@ export interface Website {
   url: string;
   public_key: string;
   user_id: string /* foreign key */;
+  sessions?: Session[];
+}
+
+export interface Session {
+  id: string;
+  client_name?: string;
+  key?: string;
+  website: Website;
 }

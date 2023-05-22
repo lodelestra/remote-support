@@ -31,7 +31,7 @@ function handleDeleteWebsite(supabaseClient: SupabaseClient, websiteId: string, 
 }
 
 async function loadData(setWebsites: Function, supabaseClient: SupabaseClient) {
-  const { data: websites } = await supabaseClient.from('websites').select('*');
+  const { data: websites } = await supabaseClient.from('websites').select('*, sessions(*)');
   setWebsites(websites as Website[]);
 }
 
@@ -58,6 +58,7 @@ export default function Page({ userWebsites }: { userWebsites: Array<Website> })
             {website.url}
           </td>
           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{website.public_key}</td>
+          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{website?.sessions?.length}</td>
           <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
             <a href="#" className="text-indigo-400 hover:text-indigo-300">
               Edit<span className="sr-only">, {website.public_key}</span>
