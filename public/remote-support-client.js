@@ -1,5 +1,69 @@
 import { createClient } from "https://cdn.skypack.dev/@supabase/supabase-js";
 
+function getUniqueSelector(element) {
+  // if the element has an ID, return it as the selector
+  if (element.id) {
+    return `#${element.id}`;
+  }
+
+  // Recursive case: build the selector by climbing up the DOM tree
+  const path = [];
+  let node = element;
+  while (node.parentNode) {
+    let tag = node.tagName.toLowerCase();
+    // let siblings = Array.from(node.parentNode.children).filter(child => child.tagName === tag);
+    let siblings = Array.from(node.parentNode.children);
+
+    let index = siblings.indexOf(node);
+
+    path.unshift(`${tag}:nth-child(${index + 1})`);
+    node = node.parentNode;
+  }
+
+  return path.join(' > ');
+}
+
+// function from @whichdam is more robuste than getUniqueSelector
+// https://stackoverflow.com/questions/5728558/get-the-dom-path-of-the-clicked-a/66143123#66143123
+function getDomPath(el) {
+  const stack = []
+
+  while (el.parentNode !== null) {
+    let sibCount = 0
+    let sibIndex = 0
+    for (let i = 0; i < el.parentNode.childNodes.length; i += 1) {
+      const sib = el.parentNode.childNodes[i]
+      if (sib.nodeName === el.nodeName) {
+        if (sib === el) {
+          sibIndex = sibCount
+          break
+        }
+        sibCount += 1
+      }
+    }
+
+    const nodeName = CSS.escape(el.nodeName.toLowerCase())
+
+    // Ignore `html` as a parent node
+    if (nodeName === 'html') break
+
+    if (el.hasAttribute('id') && el.id !== '') {
+      stack.unshift(`#${CSS.escape(el.id)}`)
+      // Remove this `break` if you want the entire path
+      break
+    } else if (sibIndex > 0) {
+      // :nth-of-type is 1-indexed
+      stack.unshift(`${nodeName}:nth-of-type(${sibIndex + 1})`)
+    } else {
+      stack.unshift(nodeName)
+    }
+
+    el = el.parentNode
+  }
+
+  return stack
+}
+
 
 
 function broadcastDomContent(channel, content) {
@@ -10,11 +74,11 @@ function broadcastDomContent(channel, content) {
   })
 }
 
-function broadcastDomTarget(channel, content, nodeId) {
+function broadcastDomTarget(channel, content, nodePath) {
   channel.send({
     type: 'broadcast',
     event: 'dom-target',
-    payload: { content, nodeId }
+    payload: { content, nodePath }
   })
 }
 
@@ -34,12 +98,12 @@ function processDomContent(channel) {
   broadcastDomContent(channel, getDomContent())
 }
 
-function processDomTarget(channel, target) {
+function processDomTarget({ channel, target, nodePath }) {
   var s = new XMLSerializer();
   // var d = document;
   var str = s.serializeToString(target);
 
-  broadcastDomTarget(channel, str, target.id)
+  broadcastDomTarget(channel, str, nodePath)
 
 }
 
@@ -54,7 +118,7 @@ function addUniqueIds() {
   });
 }
 
-window.addEventListener('load', addUniqueIds);
+// window.addEventListener('load', addUniqueIds);
 
 document.onreadystatechange = function(event) {
   if (document.readyState === "complete") {
@@ -171,8 +235,23 @@ document.onreadystatechange = function(event) {
             for (const mutation of mutationList) {
               console.log(mutation)
               console.log(mutation.target)
+
+              // removed in profite of more robust getDomPath
+              // const path = getUniqueSelector(mutation.target)
+              // console.log("path json:", JSON.stringify(path))
+              // console.log("path:", path)
+              // for debug test if selector work
+              // const pathres = document.querySelector(path)
+              // console.log(pathres)
+
+              const nodePath = getDomPath(mutation.target).join(" ")
+              // console.log("dom path", nodePath)
+              // for debug test if selector work
+              // const res = document.querySelector(nodePath)
+              // console.log(res)
+
               // processDomContent(channel)
-              processDomTarget(channel, mutation.target)
+              processDomTarget({ channel, target: mutation.target, nodePath })
               if (mutation.type === "childList") {
                 console.log("A child node has been added or removed.");
               } else if (mutation.type === "attributes") {

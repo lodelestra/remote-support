@@ -11,13 +11,13 @@ function getUniqueSelector(element) {
   while (node.parentNode) {
     let tag = node.tagName.toLowerCase();
     let siblings = Array.from(node.parentNode.children).filter(child => child.tagName === tag);
-    let index = siblings.indexOf(node);
-    path.unshift(`${tag}:nth-child(${index + 1})`);
+    let index = siblings.indexOf(node) + 1;
+    path.unshift(`${tag}:nth-child(${index})`);
     node = node.parentNode;
   }
 
   // Return the selector as a string
-  return path.join(' > ');
+  return path.join(' ');
 }
 
 document.onreadystatechange = function(event) {
@@ -100,7 +100,11 @@ document.onreadystatechange = function(event) {
         console.log('nodeId:', nodeId)
         // console.debug(content)
 
-        var toReplace = document.getElementById(nodeId)
+        // var toReplace = document.getElementById(nodeId)
+        // Replace the root of the page Dom
+        nodePath = nodePath.replace("#body", "#remote-support-container")
+        // const containerRoot = document.getElementById("#remote-support-container")
+        var toReplace = document.querySelector(nodePath)
 
         const parser = new DOMParser();
         const doc = parser.parseFromString(payload.payload.content, "application/xml");
