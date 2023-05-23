@@ -30,7 +30,7 @@ function handleDeleteWebsite(supabaseClient: SupabaseClient, websiteId: string, 
     .then((res) => loadData())
 }
 
-async function loadData(setWebsites: Function, supabaseClient: SupabaseClient) {
+async function loadWebsites(setWebsites: Function, supabaseClient: SupabaseClient) {
   const { data: websites } = await supabaseClient.from('websites').select('*, sessions(*)');
   setWebsites(websites as Website[]);
 }
@@ -40,12 +40,12 @@ export default function Page({ userWebsites }: { userWebsites: Array<Website> })
   const userDetails = useUser()
   const [websites, setWebsites] = useState<Website[] | null>(null)
 
-  const loadDataClosure = () => { loadData(setWebsites, supabaseClient) }
+  const loadData = () => { loadWebsites(setWebsites, supabaseClient) }
 
 
   useEffect(() => {
     if (userDetails) {
-      loadData(setWebsites, supabaseClient)
+      loadData()
     }
   }, [userDetails])
 
@@ -64,7 +64,7 @@ export default function Page({ userWebsites }: { userWebsites: Array<Website> })
               Edit<span className="sr-only">, {website.public_key}</span>
             </a>
             <br />
-            <a href="#" onClick={() => { handleDeleteWebsite(supabaseClient, website.id, loadDataClosure) }} className="text-indigo-400 hover:text-indigo-300">
+            <a href="#" onClick={() => { handleDeleteWebsite(supabaseClient, website.id, loadData) }} className="text-indigo-400 hover:text-indigo-300">
               Delete<span className="sr-only">, {website.public_key}</span>
             </a>
           </td>
@@ -114,7 +114,7 @@ export default function Page({ userWebsites }: { userWebsites: Array<Website> })
                           {websitesRows}
                         </tbody>
                       </table>
-                      <FormAddWebsite callback={loadDataClosure} />
+                      <FormAddWebsite onSubmit={loadData} />
                     </div>
                   </div>
                 </div>

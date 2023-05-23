@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { useUser } from '@supabase/auth-helpers-react';
 
-export default function FormAddWebsite({ callback: callback }: { callback: Function }) {
+export default function FormAddWebsite({ onSubmit: onSubmit }: { onSubmit: Function }) {
   const userDetails = useUser()
 
   const ref = useRef<HTMLInputElement>(null);
@@ -24,7 +24,7 @@ export default function FormAddWebsite({ callback: callback }: { callback: Funct
     if (ref.current !== null) {
       ref.current.value = ''
     }
-    callback()
+    onSubmit()
   }
 
   return (

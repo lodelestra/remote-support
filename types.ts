@@ -79,6 +79,7 @@ export interface Website {
 
 export interface Session {
   id: string;
+  status: string;
   client_name?: string;
   key?: string;
   website: Website;
